@@ -19,9 +19,11 @@ from django.urls import (
 )
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
+from apps.categories.urls import router as categories_router
 
 
 router = DefaultRouter()
+router.registry.extend(categories_router.registry)
 
 urlpatterns = [
     path('', include(router.urls)),
