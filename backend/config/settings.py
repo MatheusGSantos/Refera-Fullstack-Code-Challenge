@@ -33,7 +33,8 @@ SECRET_KEY = "django-insecure-)ox3x#(8c3)obl=f_f_s#&_7ie3#0i$df@^s9k%*&d*#z)+gm8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Application definition
@@ -46,9 +47,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     
+    "corsheaders",
     "rest_framework",
     
-    "corsheaders",
     
     # APPS
     *APP_LIST,
@@ -67,8 +68,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-CORS_ALLOW_ALL_ORIGINS: True
 
 ROOT_URLCONF = "config.urls"
 
@@ -124,6 +123,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
