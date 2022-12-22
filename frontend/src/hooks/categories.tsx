@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useState, useContext, useMemo } from
 import { toast } from 'react-toastify';
 import { ApiService } from '~/services/ApiService';
 import { ICategory } from '~/utils/Category/CategoryDTOS';
+import { useAppLoading } from './appLoading';
 
 interface CategoriesContextData {
   categories: ICategory[];
@@ -12,14 +13,18 @@ const CategoriesContext = createContext<CategoriesContextData>({} as CategoriesC
 
 const CategoriesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [categories, setCategories] = useState<ICategory[]>([]);
-  const api = new ApiService();
+  const { appLoading, markAsLoaded } = useAppLoading();
+  const api = useMemo(() => new ApiService(), []);
 
   const fetchCategories = useCallback(async () => {
     const id = toast.loading('Fetching categories...');
     try {
       const { results } = await api.getCategories();
 
-      setCategories(results);
+      setCategories((prev) => {
+        appLoading && markAsLoaded('CategoryList');
+        return [...prev, ...results];
+      });
       toast.update(id, {
         render: 'Categories fetched successfully',
         type: 'success',
@@ -35,7 +40,7 @@ const CategoriesProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         hideProgressBar: false,
       });
     }
-  }, []);
+  }, [api, appLoading, markAsLoaded]);
 
   return (
     <CategoriesContext.Provider

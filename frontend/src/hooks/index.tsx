@@ -3,6 +3,7 @@ import { AuthProvider } from './auth';
 import { ScrollProvider } from './scroll';
 import { CategoriesProvider } from './categories';
 import { OrdersProvider } from './orders';
+import { AppLoadingProvider } from './appLoading';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -10,12 +11,14 @@ interface AppProviderProps {
 
 export function AppProvider({ children }: AppProviderProps) {
   return (
-    <OrdersProvider>
+    <AppLoadingProvider>
       <CategoriesProvider>
-        <AuthProvider>
-          <ScrollProvider>{children}</ScrollProvider>
-        </AuthProvider>
+        <OrdersProvider>
+          <AuthProvider>
+            <ScrollProvider>{children}</ScrollProvider>
+          </AuthProvider>
+        </OrdersProvider>
       </CategoriesProvider>
-    </OrdersProvider>
+    </AppLoadingProvider>
   );
 }

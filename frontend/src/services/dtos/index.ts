@@ -7,29 +7,6 @@ export interface ICreateUserDTO {
   password: string;
 }
 
-export interface IResultInfo {
-  id: string;
-  ObjectName: string;
-  price: number;
-  description: string;
-  image: string;
-  OwnerName: string;
-  // eslint-disable-next-line camelcase
-  owner_id: string;
-  email: string;
-  category: string;
-}
-
-export interface NewObjectDTO {
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image: string;
-}
-
-export type IResultsFromSearchDTO = IResultInfo[];
-
 interface RequestWithPagination {
   count: number;
   next: string | null;

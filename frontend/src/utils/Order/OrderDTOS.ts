@@ -1,8 +1,9 @@
 export interface IOrder {
   id: number;
-  category: string;
+  category: number | string;
   contact: string;
   agency: string;
   company: string;
-  deadline: Date;
+  deadline: string;
+  description: string;
 }

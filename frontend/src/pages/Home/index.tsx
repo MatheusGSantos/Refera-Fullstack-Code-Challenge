@@ -1,87 +1,22 @@
-import React, { useState, useEffect } from 'react';
-
-// import { ApiService } from '../../services/ApiService';
-
+import { useEffect } from 'react';
 import { Container } from './styles';
 import EnhancedTable from '~/components/Table';
-// import EnhancedTable from '~/components/Table/table2';
-import { OrderData, orderHeadCells } from '~/utils/Order/OrderTableDetails';
 import { Button } from '@mui/material';
-import { ApiService } from '~/services/ApiService';
-
-// const cardContentList = [
-//   {
-//     id: '1',
-//     description: 'bla',
-//     image: 'vasd',
-//     price: 'fafdas',
-//     title: 'aaa',
-//     seller: 'asdfas',
-//   },
-//   {
-//     id: '2',
-//     description: 'bla',
-//     image: 'vasd',
-//     price: 'fafdas',
-//     title: 'aaa',
-//     seller: 'asdfas',
-//   },
-//   {
-//     id: '3',
-//     description: 'bla',
-//     image: 'vasd',
-//     price: 'fafdas',
-//     title: 'aaa',
-//     seller: 'asdfas',
-//   },
-// ];
-
-const rows = [
-  {
-    id: 20,
-    category: 'category',
-    contact: 'contact',
-    agency: 'agency',
-    company: 'company',
-    deadline: '2021-12-12',
-  },
-  {
-    id: 21,
-    category: 'category',
-    contact: 'contact',
-    agency: 'agency',
-    company: 'company',
-    deadline: '2021-12-12',
-  },
-  {
-    id: 22,
-    category: 'category',
-    contact: 'contact',
-    agency: 'agency',
-    company: 'company',
-    deadline: '2021-12-12',
-  },
-];
+import { useAppLoading } from '~/hooks/appLoading';
+import { useCategories } from '~/hooks/categories';
+import { useOrders } from '~/hooks/orders';
 
 export function Home() {
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
-  const [orders, setOrders] = useState<OrderData[]>([]);
-
-  const api = new ApiService();
+  const { fetchCategories } = useCategories();
+  const { fetchOrders } = useOrders();
+  const { appLoading } = useAppLoading();
 
   useEffect(() => {
-    const fetchOrders = async (): Promise<void> => {
-      const getOrdersResult = await api.getOrders();
-
-      if (getOrdersResult) {
-        console.info(getOrdersResult);
-        setOrders(getOrdersResult.results);
-      }
-    };
-
-    fetchOrders();
-  }, []);
+    if (appLoading) {
+      fetchCategories();
+      fetchOrders();
+    }
+  }, [appLoading, fetchCategories, fetchOrders]);
 
   return (
     <Container>

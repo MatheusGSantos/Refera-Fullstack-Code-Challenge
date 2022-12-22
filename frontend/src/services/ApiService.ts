@@ -15,11 +15,14 @@ export class ApiService {
 
   public async getOrders(params?: QueryParams): Promise<IGetAllOrdersDTO> {
     const { data } = await this.api.get(
-      `/orders/${params && Object.keys(params).length > 0 ? '?' : ''}${
-        params &&
-        Object.keys(params)
-          .map((key) => `${key}=${params[key]}`)
-          .join('&')
+      `/orders/${
+        params && Object.keys(params).length > 0
+          ? '?'.concat(
+              Object.keys(params)
+                .map((key) => `${key}=${params[key]}`)
+                .join('&'),
+            )
+          : ''
       }`,
     );
     return data;
@@ -27,11 +30,14 @@ export class ApiService {
 
   public async getCategories(params?: QueryParams): Promise<IGetAllCategoriesDTO> {
     const { data } = await this.api.get(
-      `/categories/${params && Object.keys(params).length > 0 ? '?' : ''}${
-        params &&
-        Object.keys(params)
-          .map((key) => `${key}=${params[key]}`)
-          .join('&')
+      `/categories/${
+        params && Object.keys(params).length > 0
+          ? '?'.concat(
+              Object.keys(params)
+                .map((key) => `${key}=${params[key]}`)
+                .join('&'),
+            )
+          : ''
       }`,
     );
     return data;

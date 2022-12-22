@@ -1,14 +1,7 @@
-export interface OrderData {
-  id: number;
-  category: string;
-  contact: string;
-  agency: string;
-  company: string;
-  deadline: Date;
-}
+import { IOrder } from './OrderDTOS';
 
 interface OrderHeadCell {
-  id: keyof OrderData;
+  id: keyof IOrder;
   label: string;
   type: 'string' | 'number' | 'date';
   align?: 'right' | 'left' | 'center';

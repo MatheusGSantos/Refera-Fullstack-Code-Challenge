@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useState, useContext, useMemo } from
 import { toast } from 'react-toastify';
 import { ApiService } from '~/services/ApiService';
 import { IOrder } from '~/utils/Order/OrderDTOS';
+import { useAppLoading } from './appLoading';
 
 interface OrdersContextData {
   orders: IOrder[];
@@ -12,14 +13,18 @@ const OrdersContext = createContext<OrdersContextData>({} as OrdersContextData);
 
 const OrdersProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [orders, setOrders] = useState<IOrder[]>([]);
-  const api = new ApiService();
+  const { appLoading, markAsLoaded } = useAppLoading();
+  const api = useMemo(() => new ApiService(), []);
 
   const fetchOrders = useCallback(async () => {
     const id = toast.loading('Fetching orders...');
     try {
       const { results } = await api.getOrders();
 
-      setOrders(results);
+      setOrders((prev) => {
+        appLoading && markAsLoaded('OrderList');
+        return [...prev, ...results];
+      });
       toast.update(id, {
         render: 'Orders fetched successfully',
         type: 'success',
@@ -35,7 +40,7 @@ const OrdersProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =
         hideProgressBar: false,
       });
     }
-  }, []);
+  }, [api, appLoading, markAsLoaded]);
 
   return (
     <OrdersContext.Provider value={useMemo(() => ({ orders, fetchOrders }), [orders, fetchOrders])}>
