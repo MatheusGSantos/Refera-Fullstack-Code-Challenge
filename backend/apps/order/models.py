@@ -7,6 +7,7 @@ class Order(BaseModel):
     contact = models.CharField(max_length=80)
     agency = models.CharField(max_length=80)
     company = models.CharField(max_length=80)
+    description = models.TextField(blank=True)
     deadline = models.DateField()
     
     class Meta:
