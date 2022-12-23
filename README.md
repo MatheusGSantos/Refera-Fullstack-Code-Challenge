@@ -21,6 +21,8 @@ NPM Version: `17.18.1`
 - [Sobre a Arquitetura e Padrões de Projeto Adotados](#sobre-a-arquitetura-e-padrões-de-projeto-adotados)
   - [Backend](#backend)
   - [Frontend](#frontend)
+- [Rodando o Projeto no Ambiente de Desenvolvimento](#rodando-o-projeto-no-ambiente-de-desenvolvimento)
+  - [Backend](#backend-1)
 
 ## Sobre o projeto
 
@@ -89,7 +91,7 @@ Podemos ver abaixo a arquitetura de pastas do frontend:
 .
 ├── config # Enviroment files and config related
 ├── src
-│   └── assets # Project's assets
+│   ├── assets # Project's assets
 │   ├── components # React components
 │   │   └── ComponentName
 │   │       ├── index.tsx
@@ -130,3 +132,48 @@ Podemos ver abaixo a arquitetura de pastas do frontend:
 └── yarn.lock # No need if you're not using yarn
 
 ```
+
+Venho usando essa estrutura há algum tempo e creio que seja bem segmentada e organizada. Dando um rápido overview do funcionamento do app:
+
+- O App em si é formado por um router do react-router-dom, que define que página deve ser renderizada em que rota.
+- Esse router do App está envolto em alguns providers que provém funcionalidade para todo os escopo da aplicação caso um componente precise.
+- Existe uma barra de navegação que persiste em todas as telas, pensando que futuramente outras telas e autenticação poderíam existir.
+- O conteúdo da página é exibido abaixo da barra de navegação.
+- Existe uma classe chamada ApiService, que define todos os métodos que podem ser acessados de qualquer lugar da aplicação. Esses métodos fazem requisições específicas aos endpoints da API, previnindo o erros de digitação, asserção de tipos e acesso à rotas não mapeadas ao usar essa classe.
+- São exibidos toasts no canto superior direito da tela, como feedback, para o usuário, de operações realizadas no sistema como gerar um novo order ou carregar informações na aplicação.
+- Os providers de categoria e ordem de serviço são responsáveis por buscar a lista de registros de cada um. Eles quem servem outros componentes da aplicação as informações sobre orders e categories.
+- Fluxo do APP: Quando a aplicação inicia, cai na tela de Home, que busca as informações de categoria e orders com métodos respectivos de cada provider. Cada método realiza a requisição necessária e avisa ao contexto AppLoading que seus dados foram carregados. Então, a página Home recebe um sinal de mudança do AppLoading e avisa à tabela que as informações foram carregadas e agora ela pode montar suas linhas e colunas. Funciona dessa maneira porque, pensando numa evolução do projeto, caso o usuário não esteja autenticado, os dados não devem ser carregados ainda, pois seriam requisições e renderizações desnecessárias.
+
+## Rodando o Projeto no Ambiente de Desenvolvimento
+
+Esta seção tem o intuito de instruir como rodar o projeto em ambiente de desenvolvimento.
+
+### Backend
+
+Assumindo que esse repositório já tenha sido clonado, seguir os passos abaixo:
+
+Recomendo o uso do `docker` para o banco de dados. Com o docker instalado, rodar o comando no terminal:
+
+`docker run --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres`
+
+Criando assim um contêiner com a versão de imagem mais atualizada do postgres, com nome do container sendo postgres, usuário e senha postgres e banco com nome postgres. Recomendo também usar algum tipo de ambiente virtual, como `venv` ou `conda`. No meu caso, usei o conda. Para criar um conda environment com python 3.9 e ativá-lo, após instalar o anaconda, rode os seguintes comandos no terminal:
+
+```bash
+conda create --name <nome_do_ambiente> python=3.9
+conda activate <nome_do_ambiente>
+```
+
+Com o contêiner e ambiente ativos, entrar na pasta `backend/requirements/` e rodar o seguinte comando no terminal:
+
+`pip install -r ./local.txt` ou `pip install -r ./development.txt`
+
+Confira as informações de banco no arquivo `settings.py`, dentro de `backend/config/`. Caso tenha seguido as intruções até agora, mude o atributo `NAME` na variável `DATABASES` para `'postgres'` ou crie um banco `refera_challenge` da forma que achar melhor (ex.: dbeaver, docker exec -it, etc). Por fim, na raiz do diretório `backend`, rodar:
+
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+Para gerar as migrações de banco e aplicar, e depois:
+
+`python manage.py runserver`
