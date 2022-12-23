@@ -29,14 +29,14 @@ const CategoriesProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         render: 'Categories fetched successfully',
         type: 'success',
         isLoading: false,
-        autoClose: 3000,
+        autoClose: 1000,
       });
     } catch (err: any) {
       toast.update(id, {
         render: `Error: ${err?.response?.data?.message}`,
         type: 'error',
         isLoading: false,
-        autoClose: 4000,
+        autoClose: 3000,
         hideProgressBar: false,
       });
     }

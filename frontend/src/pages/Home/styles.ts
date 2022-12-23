@@ -7,6 +7,7 @@ export const Container = styled.div`
   section {
     width: 100%;
     padding-top: 4.5rem;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-end;

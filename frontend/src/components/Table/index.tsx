@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -96,7 +95,6 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-// OK
 function EnhancedTableToolbar() {
   return (
     <Toolbar
@@ -104,8 +102,9 @@ function EnhancedTableToolbar() {
         pl: { sm: 2 },
         pr: { xs: 1, sm: 1 },
         ...{
-          bgcolor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+          bgcolor: (_) => '#4c8bcb',
+          color: (_) => '#fff',
+          borderRadius: '5px 5px 0 0',
         },
       }}
     >
