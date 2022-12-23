@@ -6,7 +6,7 @@ import {
   getLocalStorageItem,
   removeLocalStorageItem,
   setLocalStorageItem,
-} from '../utils/localStorageUtils';
+} from '../utils/LocalStorage/localStorageUtils';
 
 interface User {
   id: string;
