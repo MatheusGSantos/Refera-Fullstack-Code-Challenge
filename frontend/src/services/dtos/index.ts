@@ -20,3 +20,12 @@ export interface IGetAllOrdersDTO extends RequestWithPagination {
 export interface IGetAllCategoriesDTO extends RequestWithPagination {
   results: ICategory[];
 }
+
+export interface IOpenNewOrderDTO {
+  category: number;
+  contact: string;
+  agency: string;
+  company: string;
+  deadline: string;
+  description: string;
+}

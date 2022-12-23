@@ -23,10 +23,10 @@ export function Home() {
   return (
     <Container>
       <section>
-        <Button variant='contained' size='small' onClick={() => setModalOpen(true)}>
+        <Button variant='contained' size='medium' onClick={() => setModalOpen(true)}>
           Open New Order
         </Button>
-        <EnhancedTable />
+        <EnhancedTable dataLoading={appLoading} />
         <OpenNewOrderModal open={modalOpen} onClose={() => setModalOpen(false)} />
       </section>
     </Container>

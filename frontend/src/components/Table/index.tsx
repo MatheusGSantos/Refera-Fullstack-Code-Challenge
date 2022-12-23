@@ -17,6 +17,9 @@ import { IOrder } from '~/utils/Order/OrderDTOS';
 import { useOrders } from '~/hooks/orders';
 import { useCategories } from '~/hooks/categories';
 import './styles.css';
+import moment from 'moment';
+import { OrderDetailsModal } from '../Modal';
+import { Skeleton } from '@mui/material';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -115,52 +118,41 @@ function EnhancedTableToolbar() {
   );
 }
 
-export default function EnhancedTable() {
+export default function EnhancedTable({ dataLoading }: { dataLoading: boolean }) {
   const [order, setOrder] = useState<Order>('asc');
   const [orderBy, setOrderBy] = useState<keyof IOrder>('id');
-  const [selected, setSelected] = useState<readonly string[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<IOrder>({} as IOrder);
+
   const { orders } = useOrders();
   const { categories } = useCategories();
+
   const ordersList = useMemo(
     () =>
       orders.map((order) => {
         return {
           ...order,
           category: categories.find((category) => category.id === order.category)?.name ?? '',
+          deadline: moment(order.deadline).format('DD/MM/YYYY'),
         };
       }),
     [categories, orders],
   );
 
-  const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof IOrder) => {
+  const handleRequestSort = (_: React.MouseEvent<unknown>, property: keyof IOrder) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
 
-  const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected: readonly string[] = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
+  const handleClick = (_: React.MouseEvent<unknown>, order: IOrder) => {
+    setSelectedOrder(order);
+    setModalOpen(true);
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -173,54 +165,66 @@ export default function EnhancedTable() {
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - ordersList.length) : 0;
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', position: '' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar />
         <TableContainer>
-          <Table sx={{ minWidth: 750 }} aria-labelledby='tableTitle' size={'medium'}>
-            <EnhancedTableHead
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={handleRequestSort}
-              rowCount={ordersList.length}
-            />
-            <TableBody>
-              {/* if you don't need to support IE11, you can replace the `stableSort` call with:
-              rows.sort(getComparator(order, orderBy)).slice() */}
-              {stableSort(ordersList, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row) => {
-                  return (
-                    <TableRow
-                      hover
-                      onClick={(event) => handleClick(event, row.id.toString())}
-                      role='checkbox'
-                      tabIndex={-1}
-                      key={row.id}
-                      className={'_app-cursor-pointer'}
-                    >
-                      {Object.keys(row).map(
-                        (key) =>
-                          key !== 'description' && (
-                            <TableCell key={key} align='left'>
-                              {row[key as keyof IOrder]}
-                            </TableCell>
-                          ),
-                      )}
-                    </TableRow>
-                  );
-                })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: 53 * emptyRows,
-                  }}
-                >
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          {dataLoading ? (
+            Array.from({ length: rowsPerPage + 1 }, (_, k) => (
+              <Skeleton
+                variant='rectangular'
+                width={'100%'}
+                height={40}
+                sx={{ m: '10px 0' }}
+                key={`loadingRow-${k}`}
+              />
+            ))
+          ) : (
+            <Table sx={{ minWidth: 750 }} aria-labelledby='tableTitle' size={'medium'}>
+              <EnhancedTableHead
+                order={order}
+                orderBy={orderBy}
+                onRequestSort={handleRequestSort}
+                rowCount={ordersList.length}
+              />
+
+              <TableBody>
+                {stableSort(ordersList, getComparator(order, orderBy))
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => {
+                    return (
+                      <TableRow
+                        hover
+                        onClick={(event) => handleClick(event, row)}
+                        role='checkbox'
+                        tabIndex={-1}
+                        key={row.id}
+                        className={'_app-cursor-pointer'}
+                      >
+                        {Object.keys(row).map(
+                          (key) =>
+                            key !== 'description' && (
+                              <TableCell key={key} align='left'>
+                                {row[key as keyof IOrder]}
+                              </TableCell>
+                            ),
+                        )}
+                      </TableRow>
+                    );
+                  })}
+
+                {emptyRows > 0 && (
+                  <TableRow
+                    style={{
+                      height: 53 * emptyRows,
+                    }}
+                  >
+                    <TableCell colSpan={6} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </TableContainer>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
@@ -232,6 +236,11 @@ export default function EnhancedTable() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
+      <OrderDetailsModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        order={selectedOrder}
+      />
     </Box>
   );
 }
