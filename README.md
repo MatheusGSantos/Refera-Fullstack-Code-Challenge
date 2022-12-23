@@ -75,6 +75,12 @@ Podemos ver abaixo a arquitetura de pastas do backend:
 
 Segui parcialmente, adaptando para a situação, a estrutura encontrada nesse [repositório](https://github.com/saqibur/django-project-structure). É bem organizado, segmentado e fácil de escalar mesmo com novos APPS sendo criados. No `settings.py` deixei pronto um trecho de código que adiciona qualquer app ao INSTALLED_APPS, desde que esteja dentro da pasta apps, tirando a necessidade de adicionar manualmente a cada vez que um app for criado. No `urls.py` de cada app, é definido um `router` do `django_rest_framework` para o app, concatenando todos os `routers` no `"router do projeto"`, dentro de `config/urls.py`. Cada app representa uma entidade no banco. Antes de começar o desenvolvimento, fiz uma modelagem de como deveriam ser as tabelas dentro do banco. Segue um diagrama ER da modelagem:
 
+<div align="center">
+
+![Diagrama ER](./Refera%20Challenge%20Diagrama%20ER.jpeg?raw=true)
+
+</div>
+
 ### Frontend
 
 Podemos ver abaixo a arquitetura de pastas do frontend:
