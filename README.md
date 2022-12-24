@@ -29,6 +29,7 @@ NPM Version: `17.18.1`
   - [Frontend](#frontend-2)
 - [Considerações em Relação ao Projeto](#considerações-em-relação-ao-projeto)
 - [Como eu faria para adicionar autenticação ao projeto?](#como-eu-faria-para-adicionar-autenticação-ao-projeto)
+- [Lidando com Armazenamento de Outras Informações no Backend](#lidando-com-armazenamento-de-outras-informações-no-backend)
 
 ## Sobre o projeto
 
@@ -232,7 +233,7 @@ Primeiramente, em `backend/settings`, settar `DEBUG` para `false`, além de muda
 
 ### Frontend
 
-Esse projeto foi criado com a ferramenta Vite. Caso queira saber porque eu e alguns outros devs escolhem o Vite ao invés do create-react-app ou webpack+babel configurados manualmente, apesar de já ter usado todas essas, recomendo essa [leitura](https://semaphoreci.com/blog/vite#:~:text=Unlike%20CRA%2C%20Vite%20does%20not,improve%20development%20and%20build%20time.). Utilizei o template desse (link)[https://github.com/igdev116/vite-react-ts-eslint-prettier.git], que cria um projeto pré configurado com Vite + React + TypeScript + Eslint + Prettier. Primeiramente precisamos buildar a aplicação react, que vai transpilar o typescript em javascript e depois tudo em um "javascript puro", empacotando numa pasta build. Essa pasta build deve ser levada (deploy) para o ambiente de produção, seja qual for, e executada por alguma ferramenta, como um nginx. Vale ressaltar que o Vite carrega variáveis de ambiente de arquivos com nomes relacionados a ambientes de desenvolvimento e produção automaticamente, dependendo da forma que a aplicação é executada. No momento, estou puxando o endereço base da API do arquivo `.env.development` na pasta `frontend/config`. Um arquivo de produção `.env.production` pode ser criado, com a variável `VITE_BACKEND_BASE_URL` apontando para o endereço host do backend em produção. Todas as variáveis de ambiente devem começar com `VITE_`.
+Esse projeto foi criado com a ferramenta Vite. Caso queira saber porque eu e alguns outros devs escolhem o Vite ao invés do create-react-app ou webpack+babel configurados manualmente, apesar de já ter usado todas essas, recomendo essa [leitura](https://semaphoreci.com/blog/vite#:~:text=Unlike%20CRA%2C%20Vite%20does%20not,improve%20development%20and%20build%20time.). Utilizei o template desse [link](https://github.com/igdev116/vite-react-ts-eslint-prettier.git), que cria um projeto pré configurado com Vite + React + TypeScript + Eslint + Prettier. Primeiramente precisamos buildar a aplicação react, que vai transpilar o typescript em javascript e depois tudo em um "javascript puro", empacotando numa pasta build. Essa pasta build deve ser levada (deploy) para o ambiente de produção, seja qual for, e executada por alguma ferramenta, como um nginx. Vale ressaltar que o Vite carrega variáveis de ambiente de arquivos com nomes relacionados a ambientes de desenvolvimento e produção automaticamente, dependendo da forma que a aplicação é executada. No momento, estou puxando o endereço base da API do arquivo `.env.development` na pasta `frontend/config`. Um arquivo de produção `.env.production` pode ser criado, com a variável `VITE_BACKEND_BASE_URL` apontando para o endereço host do backend em produção. Todas as variáveis de ambiente devem começar com `VITE_`.
 
 ## Considerações em Relação ao Projeto
 
@@ -240,7 +241,20 @@ Esse projeto foi criado com a ferramenta Vite. Caso queira saber porque eu e alg
 - Infelizmente, dado o tempo, não pude correr atrás de entender como realizar um table join, sem trocar ModelViewSet por outro tipo de View e ter que definir cada método, no momento de listar os orders, o que faria com que a categoria chegasse ao frontend já descodificada, não só com id, mas também com o name. Como é necessário ter todas as categorias para listar no modal de gerar um novo order, tenho acesso à que id de categoria equivale a tal nome, então é substituído no lado do cliente mesmo, ao invés do servidor, o que não é ideal, mas garante a funcionalidade mesmo assim.
 - No backend a paginação está ativada no backend e o frontend consegue lidar com isso, porém não tive tempo, por alguns motivos, durante a semana do desafio, de fazer com que um fetch novo com a próxima página da paginação fosse feito assim que o limite de 10 registros fosse atingido no frontend. Seria uma pequena adição, mas atrasaria a escrita desse documento e optei por não fazer.
 - Tenho completa consciencia de que arquivos com secrets e coisas relacionadas não devem ser incluídos em repositórios de controle de versão por questões de segurança, mas ignorei mesmo assim pelo contexto e tempo do desafio, além de por ter o .env no frontend, agiliza o processo de instalar e executar a aplicação caso queira ser testada pela parte avaliadora.
+- Gostaria de ter implementado mask no input de telefone, mas não tive tempo.
 
 ## Como eu faria para adicionar autenticação ao projeto?
 
 O frontend já está praticamente prepardo para autenticação, só precisando criar páginas de login e signup, mas está desabilitada dado que o backend não está pronto para comportar autenticação. Primeiro faria com que o backend conseguisse gerar tokens JWT e enviar para o frontend, disponibilizando uma rota com nome `/sessions/` ou algo próximo disso. Depois, fazer com que as rotas quem precisam de autenticação consigam obter o token que será enviado no header de cada requisição e checar se ele é um token válido, permitindo ou não o acesso a rota. O frontend se preocupa em autenticar na página de login e guardar esse token ou não no localStorage, para ser recuperada em acessos futuros à página até que o token expire, sem ter que logar. Indepente de salvar ou não no localStorage, as informações do usuário podem ser salvas no contexto de autenticação do frontend e assim realizar redirecionamentos caso o usuário entre em uma página de permissão elevada sem estar loggado. Também iria atrás de outra solução, já que foi descoberto a um tempo que o localStorage não é tão seguro quanto se achava para manter informações de valor/permissão importantes.
+
+## Lidando com Armazenamento de Outras Informações no Backend
+
+Essa seção serve para responder as questões levantadas sobre lidar com armazenamento de informações de agência, companhia e contato e que mudanças precisam ser feitas na API para se adaptar a mudança. Fico meio confuso em relação ao relacionamento de algumas dessas entidades, então proponho um modelo simples onde cada um desses componentes se torna uma entidade e se relaciona com order. O diagrama abaixo ilustra minha proposta:
+
+<div align="center">
+
+![Diagrama ER](./Refera%20Challenge%20Diagrama%20ER-arbitrary%20question.jpeg?raw=true)
+
+</div>
+
+Pela parte do backend, criaria um app django para cada entidade, atualizaria o relacionamento na tabela de orders e criaria um CRUD com rotas para cada entidade, já que essas poderiam ser registradas possivelmente até pelo frontend. Obs.: ContactEntity é um nome genérico pois não sei se faria parte da entidade usuário do sistema, ou se seria apenas contato a parte, provavelmente associado a company ou realStateAgency, então, na dúvida, deixei como entidade separada.
