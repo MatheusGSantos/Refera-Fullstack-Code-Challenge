@@ -28,6 +28,7 @@ NPM Version: `17.18.1`
   - [Backend](#backend-2)
   - [Frontend](#frontend-2)
 - [Considerações em Relação ao Projeto](#considerações-em-relação-ao-projeto)
+- [Como eu faria para adicionar autenticação ao projeto?](#como-eu-faria-para-adicionar-autenticação-ao-projeto)
 
 ## Sobre o projeto
 
@@ -240,4 +241,6 @@ Esse projeto foi criado com a ferramenta Vite. Caso queira saber porque eu e alg
 - No backend a paginação está ativada no backend e o frontend consegue lidar com isso, porém não tive tempo, por alguns motivos, durante a semana do desafio, de fazer com que um fetch novo com a próxima página da paginação fosse feito assim que o limite de 10 registros fosse atingido no frontend. Seria uma pequena adição, mas atrasaria a escrita desse documento e optei por não fazer.
 - Tenho completa consciencia de que arquivos com secrets e coisas relacionadas não devem ser incluídos em repositórios de controle de versão por questões de segurança, mas ignorei mesmo assim pelo contexto e tempo do desafio, além de por ter o .env no frontend, agiliza o processo de instalar e executar a aplicação caso queira ser testada pela parte avaliadora.
 
-##
+## Como eu faria para adicionar autenticação ao projeto?
+
+O frontend já está praticamente prepardo para autenticação, só precisando criar páginas de login e signup, mas está desabilitada dado que o backend não está pronto para comportar autenticação. Primeiro faria com que o backend conseguisse gerar tokens JWT e enviar para o frontend, disponibilizando uma rota com nome `/sessions/` ou algo próximo disso. Depois, fazer com que as rotas quem precisam de autenticação consigam obter o token que será enviado no header de cada requisição e checar se ele é um token válido, permitindo ou não o acesso a rota. O frontend se preocupa em autenticar na página de login e guardar esse token ou não no localStorage, para ser recuperada em acessos futuros à página até que o token expire, sem ter que logar. Indepente de salvar ou não no localStorage, as informações do usuário podem ser salvas no contexto de autenticação do frontend e assim realizar redirecionamentos caso o usuário entre em uma página de permissão elevada sem estar loggado. Também iria atrás de outra solução, já que foi descoberto a um tempo que o localStorage não é tão seguro quanto se achava para manter informações de valor/permissão importantes.
