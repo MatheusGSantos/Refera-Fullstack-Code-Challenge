@@ -23,6 +23,11 @@ NPM Version: `17.18.1`
   - [Frontend](#frontend)
 - [Rodando o Projeto no Ambiente de Desenvolvimento](#rodando-o-projeto-no-ambiente-de-desenvolvimento)
   - [Backend](#backend-1)
+  - [Frontend](#frontend-1)
+- [Rodando o Projeto no Ambiente de Produção](#rodando-o-projeto-no-ambiente-de-produção)
+  - [Backend](#backend-2)
+  - [Frontend](#frontend-2)
+- [Considerações em Relação ao Projeto](#considerações-em-relação-ao-projeto)
 
 ## Sobre o projeto
 
@@ -154,7 +159,9 @@ Assumindo que esse repositório já tenha sido clonado, seguir os passos abaixo:
 
 Recomendo o uso do `docker` para o banco de dados. Com o docker instalado, rodar o comando no terminal:
 
-`docker run --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres`
+```bash
+docker run --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
+```
 
 Criando assim um contêiner com a versão de imagem mais atualizada do postgres, com nome do container sendo postgres, usuário e senha postgres e banco com nome postgres. Recomendo também usar algum tipo de ambiente virtual, como `venv` ou `conda`. No meu caso, usei o conda. Para criar um conda environment com python 3.9 e ativá-lo, após instalar o anaconda, rode os seguintes comandos no terminal:
 
@@ -165,7 +172,15 @@ conda activate <nome_do_ambiente>
 
 Com o contêiner e ambiente ativos, entrar na pasta `backend/requirements/` e rodar o seguinte comando no terminal:
 
-`pip install -r ./local.txt` ou `pip install -r ./development.txt`
+```bash
+pip install -r ./local.txt
+```
+
+ou
+
+```bash
+pip install -r ./development.txt
+```
 
 Confira as informações de banco no arquivo `settings.py`, dentro de `backend/config/`. Caso tenha seguido as intruções até agora, mude o atributo `NAME` na variável `DATABASES` para `'postgres'` ou crie um banco `refera_challenge` da forma que achar melhor (ex.: dbeaver, docker exec -it, etc). Por fim, na raiz do diretório `backend`, rodar:
 
@@ -176,4 +191,53 @@ python manage.py migrate
 
 Para gerar as migrações de banco e aplicar, e depois:
 
-`python manage.py runserver`
+```bash
+python manage.py runserver
+```
+
+### Frontend
+
+Com o backend ativo, agora podemos partir para o frontend. Dentro da pasta `frontend` rodar:
+
+```bash
+npm install
+```
+
+ou
+
+```bash
+yarn
+```
+
+e depois:
+
+```bash
+npm run dev
+```
+
+ou
+
+```bash
+yarn dev
+```
+
+## Rodando o Projeto no Ambiente de Produção
+
+Embora essa aplicação como um todo, especialmente o backend, não esteja preparado para qualquer tipo de ambiente de produção profissional, é possível realizar seu deploy.
+
+### Backend
+
+Primeiramente, em `backend/settings`, settar `DEBUG` para `false`, além de mudar a forma de obtenção da `SECRET_KEY` para variável de ambiente. Não possuo experiência com deploy em django, mas esse [link](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Deployment#overview) parece explicar bem como fazer. Quando lidava com APIs Node, o repositório era clonado na máquina virtual da AWS ou Google Cloud e atualizado manualmente a cada deploy, realizando um processo semelhante ao de desenvolvimento, mas com algumas configurações específicas de produção como rotas para outros serviços, carregar os arquivos de assinatura https, entre outras coisas. Imagino que isso possa ser automatizado de alguma forma com CI/CD, mas não possuo propriedade para afirmar
+
+### Frontend
+
+Esse projeto foi criado com a ferramenta Vite. Caso queira saber porque eu e alguns outros devs escolhem o Vite ao invés do create-react-app ou webpack+babel configurados manualmente, apesar de já ter usado todas essas, recomendo essa [leitura](https://semaphoreci.com/blog/vite#:~:text=Unlike%20CRA%2C%20Vite%20does%20not,improve%20development%20and%20build%20time.). Utilizei o template desse (link)[https://github.com/igdev116/vite-react-ts-eslint-prettier.git], que cria um projeto pré configurado com Vite + React + TypeScript + Eslint + Prettier. Primeiramente precisamos buildar a aplicação react, que vai transpilar o typescript em javascript e depois tudo em um "javascript puro", empacotando numa pasta build. Essa pasta build deve ser levada (deploy) para o ambiente de produção, seja qual for, e executada por alguma ferramenta, como um nginx. Vale ressaltar que o Vite carrega variáveis de ambiente de arquivos com nomes relacionados a ambientes de desenvolvimento e produção automaticamente, dependendo da forma que a aplicação é executada. No momento, estou puxando o endereço base da API do arquivo `.env.development` na pasta `frontend/config`. Um arquivo de produção `.env.production` pode ser criado, com a variável `VITE_BACKEND_BASE_URL` apontando para o endereço host do backend em produção. Todas as variáveis de ambiente devem começar com `VITE_`.
+
+## Considerações em Relação ao Projeto
+
+- Como uma primeira experiência construindo um projeto usando MaterialUI, React-Hook-Form e Django, foi uma experiência bastante proveitosa com bastante aprendizado de novas ferramentas.
+- Infelizmente, dado o tempo, não pude correr atrás de entender como realizar um table join, sem trocar ModelViewSet por outro tipo de View e ter que definir cada método, no momento de listar os orders, o que faria com que a categoria chegasse ao frontend já descodificada, não só com id, mas também com o name. Como é necessário ter todas as categorias para listar no modal de gerar um novo order, tenho acesso à que id de categoria equivale a tal nome, então é substituído no lado do cliente mesmo, ao invés do servidor, o que não é ideal, mas garante a funcionalidade mesmo assim.
+- No backend a paginação está ativada no backend e o frontend consegue lidar com isso, porém não tive tempo, por alguns motivos, durante a semana do desafio, de fazer com que um fetch novo com a próxima página da paginação fosse feito assim que o limite de 10 registros fosse atingido no frontend. Seria uma pequena adição, mas atrasaria a escrita desse documento e optei por não fazer.
+- Tenho completa consciencia de que arquivos com secrets e coisas relacionadas não devem ser incluídos em repositórios de controle de versão por questões de segurança, mas ignorei mesmo assim pelo contexto e tempo do desafio, além de por ter o .env no frontend, agiliza o processo de instalar e executar a aplicação caso queira ser testada pela parte avaliadora.
+
+##
